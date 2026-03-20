@@ -5,8 +5,6 @@ import { Pool } from 'pg';
 import * as schema from './schema';
 
 export const DRIZZLE = 'DRIZZLE_CLIENT';
-export type Database = ReturnType<typeof drizzle>;
-
 export const DatabaseProvider = {
   provide: DRIZZLE,
   useFactory: () => {
