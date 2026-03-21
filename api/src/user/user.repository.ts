@@ -9,6 +9,7 @@ import {
 } from 'src/database/database.types';
 import { ResponseUserDto } from './dto/response-user.dto';
 import { asc, eq } from 'drizzle-orm';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserRepository {
@@ -55,12 +56,32 @@ export class UserRepository {
     return userList;
   }
 
-  async getUserById(id: number) {
-    console.log(id);
+  async getUserById(id: number): Promise<ResponseUserDto> {
     const userList: ResponseUserDto[] = await this.db
       .select(this.userPasswordFilter)
       .from(users)
       .where(eq(users.id, id));
-    return userList;
+    return userList[0];
+  }
+
+  async updateUser(
+    id: number,
+    newUserData: UpdateUserDto,
+  ): Promise<ResponseUserDto> {
+    try {
+      const updatedUser = await this.db
+        .update(users)
+        .set({ ...newUserData })
+        .where(eq(users.id, id))
+        .returning(this.userPasswordFilter);
+      return updatedUser[0];
+    } catch (error: unknown) {
+      const drizzleError = error as DrizzleQueryError;
+      const pgError = drizzleError.cause;
+      if (pgError?.code === PostgresErrorCodes.UNIQUE_VIOLATION) {
+        throw new ConflictException('This email/username is already in use!');
+      }
+      throw error;
+    }
   }
 }
