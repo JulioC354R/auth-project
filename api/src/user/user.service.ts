@@ -8,16 +8,16 @@ export class UserService {
   constructor(private readonly userRepo: UserRepository) {}
 
   async create(createUserDto: CreateUserDto) {
-    await this.userRepo.create(createUserDto);
-    return 'This action adds a new user';
+    const createdUser = this.userRepo.create(createUserDto);
+    return createdUser;
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    return this.userRepo.getUsers();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.userRepo.getUserById(id);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
